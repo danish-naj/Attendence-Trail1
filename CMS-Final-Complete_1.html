@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS - College Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%); pointer-events: none; z-index: 1; }
+        #app { position: relative; z-index: 2; }
+        
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05); padding: 32px; margin: 16px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); }
+        
+        .btn { font-weight: 600; border-radius: 16px; padding: 14px 32px; border: none; cursor: pointer; transition: all 0.3s; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); color: white; }
+        .btn-sm { padding: 10px 20px; font-size: 14px; border-radius: 12px; }
+        
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 20px; border-radius: 24px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .badge-admin { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
+        .badge-professor { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .badge-student { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+        
+        input, select, textarea { border-radius: 14px; border: 2px solid #e2e8f0; padding: 14px 18px; width: 100%; margin: 10px 0; font-size: 15px; transition: all 0.3s; background: white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+        input:focus, select:focus { border-color: #667eea; outline: none; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); transform: translateY(-2px); }
+        
+        .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 28px; padding: 40px; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3); }
+        
+        .progress-bar { height: 14px; background: linear-gradient(90deg, #f0f4f8 0%, #e2e8f0 100%); border-radius: 14px; overflow: hidden; margin: 12px 0; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 14px; transition: width 0.6s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4); }
+        
+        .stat-card { background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 2px solid rgba(102, 126, 234, 0.2); border-radius: 20px; padding: 28px; transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2); }
+        
+        .grid { display: grid; gap: 24px; }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        
+        h1 { font-family: 'Poppins', sans-serif; font-size: 48px; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; }
+        h2 { font-family: 'Poppins', sans-serif; font-size: 32px; font-weight: 700; color: #1a202c; margin-bottom: 24px; }
+        h3 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 600; color: #2d3748; margin-bottom: 12px; }
+        
+        .flex { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .mb-4 { margin-bottom: 24px; }
+        .mt-4 { margin-top: 24px; }
+        .p-4 { padding: 24px; }
+        .bg-gray { background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px; }
+        .text-gray { color: #718096; }
+        .text-green { color: #38a169; font-weight: 600; }
+        .text-red { color: #e53e3e; font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: 14px; }
+        
+        .item-card { background: white; border-radius: 16px; padding: 20px; border: 2px solid #e2e8f0; transition: all 0.3s; margin-bottom: 16px; }
+        .item-card:hover { border-color: #667eea; box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15); transform: translateX(4px); }
+        
+        .student-card { background: white; border-radius: 16px; padding: 20px; border-left: 4px solid; transition: all 0.3s; margin-bottom: 12px; }
+        .student-card.present { border-color: #38a169; background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); }
+        .student-card.absent { border-color: #e2e8f0; }
+        .student-card:hover { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); transform: translateX(4px); }
+        
+        .session-card { background: white; border-radius: 20px; padding: 24px; border: 2px solid #e2e8f0; transition: all 0.3s; margin-bottom: 20px; }
+        .session-card:hover { border-color: #667eea; box-shadow: 0 12px 28px rgba(102, 126, 234, 0.15); transform: translateY(-4px); }
+        
+        .class-card { background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 28px; border-radius: 20px; border: 2px solid rgba(102, 126, 234, 0.2); transition: all 0.3s; }
+        .class-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2); }
+        
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; }
+        
+        @media (max-width: 768px) {
+            .glass-card { padding: 20px; margin: 12px; }
+            h1 { font-size: 36px; }
+            h2 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;">
+            <div class="glass-card" style="max-width:450px;width:100%;text-align:center;">
+                <div style="font-size:64px;margin-bottom:16px;">🎓</div>
+                <h2>Loading...</h2>
+                <p class="text-gray">Initializing system</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        var DB = {
+            admins: JSON.parse(localStorage.getItem('cms_admins') || '[{"id":"1","email":"admin@cms.edu","name":"Admin","password":"admin123"}]'),
+            professors: JSON.parse(localStorage.getItem('cms_professors') || '[{"id":"1","email":"prof@cms.edu","name":"Dr. Kumar","password":"prof123","specialization":"AI"}]'),
+            students: JSON.parse(localStorage.getItem('cms_students') || '[{"id":"1","email":"student@cms.edu","name":"Alice Johnson","password":"student123","rollNumber":"CS001","courseId":"1","yearId":"1"}]'),
+            schools: JSON.parse(localStorage.getItem('cms_schools') || '[]'),
+            departments: JSON.parse(localStorage.getItem('cms_departments') || '[]'),
+            courses: JSON.parse(localStorage.getItem('cms_courses') || '[]'),
+            years: [{"id":"1","name":"Year 1"},{"id":"2","name":"Year 2"},{"id":"3","name":"Year 3"},{"id":"4","name":"Year 4"}],
+            semesters: [{"id":"1","name":"Semester 1"},{"id":"2","name":"Semester 2"}],
+            classes: JSON.parse(localStorage.getItem('cms_classes') || '[]'),
+            assignments: JSON.parse(localStorage.getItem('cms_assignments') || '[]'),
+            sessions: JSON.parse(localStorage.getItem('cms_sessions') || '[]'),
+            attendance: JSON.parse(localStorage.getItem('cms_attendance') || '[]'),
+            save: function() {
+                localStorage.setItem('cms_admins', JSON.stringify(this.admins));
+                localStorage.setItem('cms_professors', JSON.stringify(this.professors));
+                localStorage.setItem('cms_students', JSON.stringify(this.students));
+                localStorage.setItem('cms_schools', JSON.stringify(this.schools));
+                localStorage.setItem('cms_departments', JSON.stringify(this.departments));
+                localStorage.setItem('cms_courses', JSON.stringify(this.courses));
+                localStorage.setItem('cms_classes', JSON.stringify(this.classes));
+                localStorage.setItem('cms_assignments', JSON.stringify(this.assignments));
+                localStorage.setItem('cms_sessions', JSON.stringify(this.sessions));
+                localStorage.setItem('cms_attendance', JSON.stringify(this.attendance));
+            },
+            init: function() {
+                if (this.schools.length === 0) {
+                    this.schools = [
+                        {id:'1',name:'School of Computer Science & Engineering',code:'SCSE'},
+                        {id:'2',name:'School of Design & Creative Arts',code:'SDMCA'}
+                    ];
+                    this.departments = [
+                        {id:'1',schoolId:'1',name:'Bachelor of Technology',code:'BTECH'},
+                        {id:'2',schoolId:'1',name:'BCA',code:'BCA'}
+                    ];
+                    this.courses = [
+                        {id:'1',departmentId:'1',name:'B.Tech Computer Science',code:'BTECH-CSE'},
+                        {id:'2',departmentId:'2',name:'BCA AI',code:'BCA-AI'}
+                    ];
+                    this.save();
+                }
+            }
+        };
+        
+        var user = JSON.parse(sessionStorage.getItem('user') || 'null');
+        var view = 'dashboard';
+        var profView = 'classes';
+        var modal = null;
+        
+        function login() {
+            var email = prompt('Email:'), pass = prompt('Password:');
+            if (!email || !pass) return;
+            var found = DB.admins.find(function(u) { return u.email === email && u.password === pass; });
+            if (found) { user = Object.assign({}, found, {role:'admin'}); sessionStorage.setItem('user', JSON.stringify(user)); render(); return; }
+            found = DB.professors.find(function(u) { return u.email === email && u.password === pass; });
+            if (found) { user = Object.assign({}, found, {role:'professor'}); sessionStorage.setItem('user', JSON.stringify(user)); render(); return; }
+            found = DB.students.find(function(u) { return u.email === email && u.password === pass; });
+            if (found) { user = Object.assign({}, found, {role:'student'}); sessionStorage.setItem('user', JSON.stringify(user)); render(); return; }
+            alert('Invalid credentials');
+        }
+        
+        function logout() { user = null; sessionStorage.removeItem('user'); view = 'dashboard'; profView = 'classes'; render(); }
+        
+        function addSchool(name, code) { DB.schools.push({id:Date.now().toString(), name:name, code:code}); DB.save(); render(); }
+        function addDepartment(schoolId, name, code) { DB.departments.push({id:Date.now().toString(), schoolId:schoolId, name:name, code:code}); DB.save(); render(); }
+        function addCourse(deptId, name, code) { DB.courses.push({id:Date.now().toString(), departmentId:deptId, name:name, code:code}); DB.save(); render(); }
+        function addClass(courseId, yearId, semesterId, name, code, room) { DB.classes.push({id:Date.now().toString(), courseId:courseId, yearId:yearId, semesterId:semesterId, name:name, code:code, roomNumber:room}); DB.save(); render(); }
+        function addProfessor(email, name, pass, spec, phone) { DB.professors.push({id:Date.now().toString(), email:email, name:name, password:pass, specialization:spec, phone:phone}); DB.save(); render(); }
+        function addStudent(email, name, pass, roll, courseId, yearId, phone) { DB.students.push({id:Date.now().toString(), email:email, name:name, password:pass, rollNumber:roll, courseId:courseId, yearId:yearId, phone:phone}); DB.save(); render(); }
+        function deleteItem(type, id) { if (!confirm('Delete?')) return; DB[type] = DB[type].filter(function(i) { return i.id !== id; }); DB.save(); render(); }
+        function assignProfToClass(profId, classId) {
+            if (DB.assignments.find(function(a) { return a.professorId === profId && a.classId === classId; })) {
+                alert('Already assigned!'); return;
+            }
+            DB.assignments.push({id:Date.now().toString(), professorId:profId, classId:classId});
+            DB.save(); alert('Assigned!'); closeModal(); render();
+        }
+        
+        function createSession(classId, topic, date, startTime, endTime) {
+            DB.sessions.push({id: Date.now().toString(), classId: classId, topic: topic, date: date, startTime: startTime, endTime: endTime, createdBy: user.id});
+            DB.save(); alert('✓ Session created!'); closeModal(); render();
+        }
+        
+        function getClassStudents(classId) {
+            var cls = DB.classes.find(function(c) { return c.id === classId; });
+            if (!cls) return [];
+            return DB.students.filter(function(s) { return s.courseId === cls.courseId && s.yearId === cls.yearId; });
+        }
+        
+        function toggleAttendance(sessionId, studentId) {
+            var existing = DB.attendance.find(function(a) { return a.sessionId === sessionId && a.studentId === studentId; });
+            if (existing) { DB.attendance = DB.attendance.filter(function(a) { return a.id !== existing.id; }); }
+            else { DB.attendance.push({id: Date.now().toString(), sessionId: sessionId, studentId: studentId, status: 'present', markedAt: new Date().toISOString(), markedBy: user.id}); }
+            DB.save(); render();
+        }
+        
+        function getSessionAttendance(sessionId) { return DB.attendance.filter(function(a) { return a.sessionId === sessionId; }); }
+        
+        function getClassStatistics(classId) {
+            var students = getClassStudents(classId);
+            var sessions = DB.sessions.filter(function(s) { return s.classId === classId; });
+            var studentStats = students.map(function(student) {
+                var attended = DB.attendance.filter(function(a) {
+                    return a.studentId === student.id && sessions.some(function(s) { return s.id === a.sessionId; });
+                }).length;
+                var percentage = sessions.length > 0 ? ((attended / sessions.length) * 100).toFixed(1) : 0;
+                return { student: student, attended: attended, total: sessions.length, percentage: percentage };
+            });
+            var avgAttendance = studentStats.length > 0 ? (studentStats.reduce(function(sum, s) { return sum + parseFloat(s.percentage); }, 0) / studentStats.length).toFixed(1) : 0;
+            return { students: studentStats, totalStudents: students.length, totalSessions: sessions.length, averageAttendance: avgAttendance };
+        }
+        
+        function openModal(content) { modal = content; render(); }
+        function closeModal() { modal = null; render(); }
+        
+        function render() {
+            if (!user) {
+                document.getElementById('app').innerHTML = 
+                    '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;">' +
+                    '<div class="glass-card" style="max-width:500px;width:100%;text-align:center;">' +
+                    '<div style="font-size:80px;margin-bottom:24px;">🎓</div>' +
+                    '<h1 style="font-size:56px;margin-bottom:12px;">CMS</h1>' +
+                    '<p style="font-size:18px;color:#718096;margin-bottom:32px;">College Management System</p>' +
+                    '<button onclick="login()" class="btn btn-primary" style="width:100%;margin-bottom:24px;padding:18px;">🔐 Sign In</button>' +
+                    '<div class="bg-gray p-4"><p class="font-bold mb-4">Demo Accounts</p>' +
+                    '<div style="display:grid;gap:12px;text-align:left;">' +
+                    '<div style="display:flex;justify-content:space-between;padding:12px;background:white;border-radius:12px;"><span>👨‍💼 Admin</span><span class="text-sm text-gray">admin@cms.edu</span></div>' +
+                    '<div style="display:flex;justify-content:space-between;padding:12px;background:white;border-radius:12px;"><span>👨‍🏫 Professor</span><span class="text-sm text-gray">prof@cms.edu</span></div>' +
+                    '<div style="display:flex;justify-content:space-between;padding:12px;background:white;border-radius:12px;"><span>👨‍🎓 Student</span><span class="text-sm text-gray">student@cms.edu</span></div>' +
+                    '</div><p style="margin-top:16px;" class="text-sm text-gray">Password: respective123</p></div></div></div>' +
+                    (modal ? '<div class="modal" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">' + modal + '</div></div>' : '');
+                return;
+            }
+            
+            if (user.role === 'professor') {
+                var assignedClasses = DB.assignments.filter(function(a) { return a.professorId === user.id; });
+                var profSessions = DB.sessions.filter(function(s) { return s.createdBy === user.id; });
+                var content = '';
+                
+                if (profView === 'classes') {
+                    content = '<div class="glass-card"><h2>📚 My Classes</h2>';
+                    if (assignedClasses.length === 0) {
+                        content += '<div style="text-align:center;padding:60px 20px;"><div style="font-size:64px;margin-bottom:16px;">📋</div>' +
+                                   '<p class="text-gray" style="font-size:18px;">No classes assigned yet</p>' +
+                                   '<p class="text-sm text-gray mt-4">Contact admin to get class assignments</p></div>';
+                    } else {
+                        content += '<div class="grid grid-2">';
+                        assignedClasses.forEach(function(assignment) {
+                            var cls = DB.classes.find(function(c) { return c.id === assignment.classId; });
+                            var course = DB.courses.find(function(c) { return c.id === (cls ? cls.courseId : ''); });
+                            var year = DB.years.find(function(y) { return y.id === (cls ? cls.yearId : ''); });
+                            var semester = DB.semesters.find(function(s) { return s.id === (cls ? cls.semesterId : ''); });
+                            var students = getClassStudents(cls ? cls.id : '');
+                            var sessions = DB.sessions.filter(function(s) { return s.classId === (cls ? cls.id : ''); });
+                            content += 
+                                '<div class="class-card">' +
+                                '<h3 style="color:#667eea;margin-bottom:8px;">📖 ' + (cls ? cls.name : 'Unknown') + '</h3>' +
+                                '<p class="text-sm text-gray" style="margin-bottom:8px;">' + (course ? course.name : '') + '</p>' +
+                                '<p class="text-sm text-gray" style="margin-bottom:20px;">' + (year ? year.name : '') + ' - ' + (semester ? semester.name : '') + '</p>' +
+                                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">' +
+                                '<div style="background:white;padding:16px;border-radius:12px;text-align:center;">' +
+                                '<div style="font-size:32px;font-weight:700;color:#667eea;">' + students.length + '</div>' +
+                                '<div style="font-size:13px;color:#718096;">Students</div></div>' +
+                                '<div style="background:white;padding:16px;border-radius:12px;text-align:center;">' +
+                                '<div style="font-size:32px;font-weight:700;color:#38a169;">' + sessions.length + '</div>' +
+                                '<div style="font-size:13px;color:#718096;">Sessions</div></div>' +
+                                '</div>' +
+                                '<button onclick="openModal(\'<h2>✨ Create New Session</h2><p class=\\\'text-gray mb-4\\\'>Class: ' + (cls ? cls.name : '') + '</p>' +
+                                '<form onsubmit=\\\'event.preventDefault();createSession(\\\\\\\'' + (cls ? cls.id : '') + '\\\\\\\',this.topic.value,this.date.value,this.startTime.value,this.endTime.value);\\\'>' +
+                                '<input name=\\\'topic\\\' placeholder=\\\'📝 Session Topic\\\' required>' +
+                                '<input name=\\\'date\\\' type=\\\'date\\\' required value=\\\'' + new Date().toISOString().split('T')[0] + '\\\'>' +
+                                '<div style=\\\'display:grid;grid-template-columns:1fr 1fr;gap:16px;\\\'>' +
+                                '<input name=\\\'startTime\\\' type=\\\'time\\\' required>' +
+                                '<input name=\\\'endTime\\\' type=\\\'time\\\' required>' +
+                                '</div>' +
+                                '<button type=\\\'submit\\\' class=\\\'btn btn-success\\\' style=\\\'width:100%;margin-top:16px;\\\'>✓ Create Session</button>' +
+                                '</form>\')" class="btn btn-success" style="width:100%;">➕ Create Session</button>' +
+                                '</div>';
+                        });
+                        content += '</div>';
+                    }
+                    content += '</div>';
+                } else if (profView === 'sessions') {
+                    content = '<div class="glass-card"><h2>📅 Sessions & Attendance</h2>';
+                    if (profSessions.length === 0) {
+                        content += '<div style="text-align:center;padding:60px 20px;"><div style="font-size:64px;margin-bottom:16px;">📆</div>' +
+                                   '<p class="text-gray" style="font-size:18px;">No sessions created yet</p></div>';
+                    } else {
+                        content += '<div style="display:grid;gap:20px;">';
+                        profSessions.forEach(function(session) {
+                            var cls = DB.classes.find(function(c) { return c.id === session.classId; });
+                            var students = getClassStudents(session.classId);
+                            var attendance = getSessionAttendance(session.id);
+                            var percentage = students.length > 0 ? Math.round((attendance.length / students.length) * 100) : 0;
+                            
+                            content += 
+                                '<div class="session-card">' +
+                                '<div class="flex-between">' +
+                                '<div style="flex:1;">' +
+                                '<h3 style="color:#2d3748;margin-bottom:8px;">📚 ' + session.topic + '</h3>' +
+                                '<p class="text-sm text-gray" style="margin-bottom:12px;">' + (cls ? cls.name : '') + '</p>' +
+                                '<div class="flex" style="margin-bottom:16px;font-size:14px;color:#718096;">' +
+                                '<span>📅 ' + session.date + '</span>' +
+                                '<span>🕐 ' + session.startTime + ' - ' + session.endTime + '</span>' +
+                                '</div>' +
+                                '<div style="display:flex;align-items:center;gap:16px;">' +
+                                '<span style="font-size:28px;font-weight:700;" class="' + (percentage >= 75 ? 'text-green' : 'text-red') + '">' + percentage + '%</span>' +
+                                '<span class="text-gray text-sm">' + attendance.length + '/' + students.length + ' present</span>' +
+                                '</div>' +
+                                '<div class="progress-bar" style="width:250px;"><div class="progress-fill" style="width:' + percentage + '%"></div></div>' +
+                                '</div>' +
+                                '<button onclick="openModal(\'<h2>✅ Mark Attendance</h2>' +
+                                '<div class=\\\'bg-gray p-4 mb-4\\\'><h3>' + session.topic + '</h3><p class=\\\'text-gray\\\'>' + (cls ? cls.name : '') + ' | ' + session.date + '</p></div>' +
+                                '<div style=\\\'display:grid;gap:16px;max-height:500px;overflow-y:auto;\\\'>' +
+                                students.map(function(s) {
+                                    var isPresent = attendance.some(function(a) { return a.studentId === s.id; });
+                                    return '<div class=\\\'student-card ' + (isPresent ? 'present' : 'absent') + '\\\'>' +
+                                           '<div class=\\\'flex-between\\\'>' +
+                                           '<div><p class=\\\'font-bold\\\'>' + (isPresent ? '✓ ' : '') + s.name + '</p>' +
+                                           '<p class=\\\'text-sm text-gray\\\'>' + s.rollNumber + '</p></div>' +
+                                           '<button onclick=\\\'toggleAttendance(\\\\\\\'' + session.id + '\\\\\\\',\\\\\\\'' + s.id + '\\\\\\\');\\\' class=\\\'btn btn-sm ' + (isPresent ? 'btn-danger' : 'btn-success') + '\\\'>' +
+                                           (isPresent ? '✕ Remove' : '✓ Mark') + '</button></div></div>';
+                                }).join('') +
+                                '</div>' +
+                                '<button onclick=\\\'closeModal()\\\' class=\\\'btn btn-primary\\\' style=\\\'width:100%;margin-top:24px;\\\'>Close</button>' +
+                                '\')" class="btn btn-primary btn-sm">✏️ Mark Attendance</button>' +
+                                '</div></div>';
+                        });
+                        content += '</div>';
+                    }
+                    content += '</div>';
+                } else if (profView === 'statistics') {
+                    content = '<div class="glass-card"><h2>📊 Class Statistics</h2>';
+                    if (assignedClasses.length === 0) {
+                        content += '<div style="text-align:center;padding:60px 20px;"><div style="font-size:64px;margin-bottom:16px;">📈</div>' +
+                                   '<p class="text-gray" style="font-size:18px;">No statistics available</p></div>';
+                    } else {
+                        content += '<div style="display:grid;gap:32px;">';
+                        assignedClasses.forEach(function(assignment) {
+                            var stats = getClassStatistics(assignment.classId);
+                            var cls = DB.classes.find(function(c) { return c.id === assignment.classId; });
+                            var course = DB.courses.find(function(c) { return c.id === (cls ? cls.courseId : ''); });
+                            
+                            content += 
+                                '<div style="background:linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);padding:32px;border-radius:24px;border:2px solid #e2e8f0;">' +
+                                '<h3 style="color:#667eea;margin-bottom:8px;">📚 ' + (cls ? cls.name : '') + '</h3>' +
+                                '<p class="text-gray mb-4" style="font-size:14px;">' + (course ? course.name : '') + '</p>' +
+                                '<div class="grid grid-3 mb-4">' +
+                                '<div class="stat-card" style="text-align:center;"><div style="font-size:48px;font-weight:800;color:#4299e1;">' + stats.totalStudents + '</div><div class="text-sm text-gray">Students</div></div>' +
+                                '<div class="stat-card" style="text-align:center;"><div style="font-size:48px;font-weight:800;color:#48bb78;">' + stats.totalSessions + '</div><div class="text-sm text-gray">Sessions</div></div>' +
+                                '<div class="stat-card" style="text-align:center;"><div style="font-size:48px;font-weight:800;" class="' + (stats.averageAttendance >= 75 ? 'text-green' : 'text-red') + '">' + stats.averageAttendance + '%</div><div class="text-sm text-gray">Avg Attendance</div></div>' +
+                                '</div>' +
+                                '<button onclick="openModal(\'<h2>📊 Detailed Analytics</h2>' +
+                                '<h3 style=\\\'margin-top:24px;margin-bottom:16px;\\\'>👥 Student Performance</h3>' +
+                                '<div style=\\\'display:grid;gap:16px;max-height:400px;overflow-y:auto;\\\'>' +
+                                stats.students.sort(function(a,b) { return b.percentage - a.percentage; }).map(function(s) {
+                                    return '<div class=\\\'bg-gray p-4\\\'>' +
+                                           '<div class=\\\'flex-between mb-4\\\'><div><p class=\\\'font-bold\\\'>' + s.student.name + '</p><p class=\\\'text-sm text-gray\\\'>' + s.student.rollNumber + '</p></div>' +
+                                           '<div style=\\\'text-align:right;\\\'><div style=\\\'font-size:28px;font-weight:700;\\\' class=\\\'' + (s.percentage >= 75 ? 'text-green' : 'text-red') + '\\\'>' + s.percentage + '%</div>' +
+                                           '<div class=\\\'text-sm text-gray\\\'>' + s.attended + '/' + s.total + '</div></div></div>' +
+                                           '<div class=\\\'progress-bar\\\'><div class=\\\'progress-fill\\\' style=\\\'width:' + s.percentage + '%\\\'></div></div></div>';
+                                }).join('') +
+                                '</div>' +
+                                '<button onclick=\\\'closeModal()\\\' class=\\\'btn btn-primary\\\' style=\\\'width:100%;margin-top:24px;\\\'>Close</button>' +
+                                '\')" class="btn btn-primary" style="width:100%;">📈 View Detailed Analytics</button>' +
+                                '</div>';
+                        });
+                        content += '</div>';
+                    }
+                    content += '</div>';
+                }
+                
+                document.getElementById('app').innerHTML = 
+                    '<div style="padding:20px;max-width:1400px;margin:0 auto;">' +
+                    '<div class="glass-card"><div class="flex-between">' +
+                    '<div><h1 style="font-size:42px;margin-bottom:8px;">' + user.name + '</h1><span class="badge badge-professor">👨‍🏫 Professor</span></div>' +
+                    '<button onclick="logout()" class="btn btn-danger">🚪 Logout</button>' +
+                    '</div></div>' +
+                    '<div class="glass-card mt-4"><div class="flex">' +
+                    '<button onclick="profView=\'classes\';render();" class="btn btn-sm ' + (profView==='classes'?'btn-primary':'') + '">📚 Classes</button>' +
+                    '<button onclick="profView=\'sessions\';render();" class="btn btn-sm ' + (profView==='sessions'?'btn-primary':'') + '">📅 Sessions</button>' +
+                    '<button onclick="profView=\'statistics\';render();" class="btn btn-sm ' + (profView==='statistics'?'btn-primary':'') + '">📊 Statistics</button>' +
+                    '</div></div>' +
+                    content +
+                    '</div>' +
+                    (modal ? '<div class="modal" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">' + modal + '</div></div>' : '');
+                return;
+            }
+            
+            if (user.role === 'admin') {
+                var content = '';
+                var menu = '<div class="flex">' +
+                    ['dashboard','schools','departments','courses','classes','professors','students'].map(function(v) {
+                        return '<button onclick="view=\'' + v + '\';render();" class="btn btn-sm ' + (view===v?'btn-primary':'') + '">' + 
+                               v.charAt(0).toUpperCase() + v.slice(1) + '</button>';
+                    }).join('') + '</div>';
+                
+                if (view === 'dashboard') {
+                    content = '<div class="glass-card"><h2>📊 Overview</h2><div class="grid grid-4">' +
+                        '<div class="stat-card" style="text-align:center;"><div style="font-size:48px;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">' + DB.schools.length + '</div><div class="text-gray">Schools</div></div>' +
+                        '<div class="stat-card" style="text-align:center;"><div style="font-size:48px;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">' + DB.departments.length + '</div><div class="text-gray">Departments</div></div>' +
+                        '<div class="stat-card" style="text-align:center;"><div style="font-size:48px;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">' + DB.courses.length + '</div><div class="text-gray">Courses</div></div>' +
+                        '<div class="stat-card" style="text-align:center;"><div style="font-size:48px;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">' + DB.classes.length + '</div><div class="text-gray">Classes</div></div>' +
+                        '</div></div>';
+                } else if (view === 'schools') {
+                    content = '<div class="glass-card"><h2>🏫 Schools</h2>' +
+                        '<form onsubmit="event.preventDefault();addSchool(this.name.value,this.code.value);this.reset();" class="flex mb-4">' +
+                        '<input name="name" placeholder="School Name" required style="flex:1;margin:0;">' +
+                        '<input name="code" placeholder="Code" required style="width:150px;margin:0;">' +
+                        '<button type="submit" class="btn btn-success">➕ Add</button></form>' +
+                        '<div>' + DB.schools.map(function(s) {
+                            return '<div class="item-card flex-between"><div><h3>' + s.name + '</h3><p class="text-sm text-gray">' + s.code + '</p></div>' +
+                                   '<button onclick="deleteItem(\'schools\',\'' + s.id + '\')" class="btn btn-danger btn-sm">🗑️ Delete</button></div>';
+                        }).join('') + '</div></div>';
+                } else if (view === 'departments') {
+                    content = '<div class="glass-card"><h2>🏢 Departments</h2>' +
+                        '<form onsubmit="event.preventDefault();addDepartment(this.schoolId.value,this.name.value,this.code.value);this.reset();" class="grid grid-2 mb-4">' +
+                        '<select name="schoolId" required>' + '<option value="">Select School</option>' + DB.schools.map(function(s) { return '<option value="' + s.id + '">' + s.name + '</option>'; }).join('') + '</select>' +
+                        '<input name="name" placeholder="Department Name" required>' +
+                        '<input name="code" placeholder="Code" required>' +
+                        '<button type="submit" class="btn btn-success">➕ Add</button></form>' +
+                        '<div>' + DB.departments.map(function(d) {
+                            var school = DB.schools.find(function(s) { return s.id === d.schoolId; });
+                            return '<div class="item-card flex-between"><div><h3>' + d.name + '</h3><p class="text-sm text-gray">' + (school ? school.name : 'N/A') + '</p></div>' +
+                                   '<button onclick="deleteItem(\'departments\',\'' + d.id + '\')" class="btn btn-danger btn-sm">🗑️ Delete</button></div>';
+                        }).join('') + '</div></div>';
+                } else if (view === 'courses') {
+                    content = '<div class="glass-card"><h2>📚 Courses</h2>' +
+                        '<form onsubmit="event.preventDefault();addCourse(this.deptId.value,this.name.value,this.code.value);this.reset();" class="grid grid-2 mb-4">' +
+                        '<select name="deptId" required>' + '<option value="">Select Department</option>' + DB.departments.map(function(d) { return '<option value="' + d.id + '">' + d.name + '</option>'; }).join('') + '</select>' +
+                        '<input name="name" placeholder="Course Name" required>' +
+                        '<input name="code" placeholder="Code" required>' +
+                        '<button type="submit" class="btn btn-success">➕ Add</button></form>' +
+                        '<div style="max-height:500px;overflow-y:auto;">' + DB.courses.map(function(c) {
+                            var dept = DB.departments.find(function(d) { return d.id === c.departmentId; });
+                            return '<div class="item-card flex-between"><div><h3 style="font-size:16px;">' + c.name + '</h3><p class="text-sm text-gray">' + (dept ? dept.name : 'N/A') + '</p></div>' +
+                                   '<button onclick="deleteItem(\'courses\',\'' + c.id + '\')" class="btn btn-danger btn-sm">🗑️</button></div>';
+                        }).join('') + '</div></div>';
+                } else if (view === 'classes') {
+                    content = '<div class="glass-card"><h2>🎓 Classes</h2>' +
+                        '<form onsubmit="event.preventDefault();addClass(this.courseId.value,this.yearId.value,this.semesterId.value,this.name.value,this.code.value,this.room.value);this.reset();" class="grid grid-3 mb-4">' +
+                        '<select name="courseId" required>' + '<option value="">Course</option>' + DB.courses.map(function(c) { return '<option value="' + c.id + '">' + c.name + '</option>'; }).join('') + '</select>' +
+                        '<select name="yearId" required>' + '<option value="">Year</option>' + DB.years.map(function(y) { return '<option value="' + y.id + '">' + y.name + '</option>'; }).join('') + '</select>' +
+                        '<select name="semesterId" required>' + '<option value="">Semester</option>' + DB.semesters.map(function(s) { return '<option value="' + s.id + '">' + s.name + '</option>'; }).join('') + '</select>' +
+                        '<input name="name" placeholder="Class Name" required>' +
+                        '<input name="code" placeholder="Code" required>' +
+                        '<input name="room" placeholder="Room">' +
+                        '<button type="submit" class="btn btn-success" style="grid-column:span 3;">➕ Add Class</button></form>' +
+                        '<div>' + DB.classes.map(function(cls) {
+                            var course = DB.courses.find(function(c) { return c.id === cls.courseId; });
+                            var year = DB.years.find(function(y) { return y.id === cls.yearId; });
+                            var semester = DB.semesters.find(function(s) { return s.id === cls.semesterId; });
+                            return '<div class="item-card flex-between"><div><h3>' + cls.name + ' (' + cls.code + ')</h3><p class="text-sm text-gray">' + (course ? course.name : '') + ' | ' + (year ? year.name : '') + ' - ' + (semester ? semester.name : '') + '</p></div>' +
+                                   '<div class="flex"><button onclick="openModal(\'<h2>Assign Professor</h2><select id=\\\'profSelect\\\' class=\\\'mb-4\\\'>' + DB.professors.map(function(p) { return '<option value=\\\'' + p.id + '\\\'>' + p.name + '</option>'; }).join('') + '</select>' +
+                                   '<button onclick=\\\'assignProfToClass(document.getElementById(\\\\\\\&quot;profSelect\\\\\\\&quot;).value,\\\'' + cls.id + '\\\');\\\' class=\\\'btn btn-success\\\'>Assign</button>\')" class="btn btn-primary btn-sm">👨‍🏫 Assign</button>' +
+                                   '<button onclick="deleteItem(\'classes\',\'' + cls.id + '\')" class="btn btn-danger btn-sm">🗑️</button></div></div>';
+                        }).join('') + '</div></div>';
+                } else if (view === 'professors') {
+                    content = '<div class="glass-card"><h2>👨‍🏫 Professors</h2>' +
+                        '<form onsubmit="event.preventDefault();addProfessor(this.email.value,this.name.value,this.pass.value,this.spec.value,this.phone.value);this.reset();" class="grid grid-3 mb-4">' +
+                        '<input name="email" type="email" placeholder="Email" required>' +
+                        '<input name="name" placeholder="Name" required>' +
+                        '<input name="pass" placeholder="Password" required>' +
+                        '<input name="spec" placeholder="Specialization">' +
+                        '<input name="phone" placeholder="Phone">' +
+                        '<button type="submit" class="btn btn-success" style="grid-column:span 3;">➕ Add Professor</button></form>' +
+                        '<div>' + DB.professors.map(function(p) {
+                            var assignments = DB.assignments.filter(function(a) { return a.professorId === p.id; });
+                            return '<div class="item-card flex-between"><div><h3>' + p.name + '</h3><p class="text-sm text-gray">' + p.email + ' | ' + (p.specialization || 'N/A') + '</p>' +
+                                   '<p class="text-sm text-green">' + assignments.length + ' classes assigned</p></div>' +
+                                   '<button onclick="deleteItem(\'professors\',\'' + p.id + '\')" class="btn btn-danger btn-sm">🗑️</button></div>';
+                        }).join('') + '</div></div>';
+                } else if (view === 'students') {
+                    content = '<div class="glass-card"><h2>👨‍🎓 Students</h2>' +
+                        '<form onsubmit="event.preventDefault();addStudent(this.email.value,this.name.value,this.pass.value,this.roll.value,this.courseId.value,this.yearId.value,this.phone.value);this.reset();" class="grid grid-3 mb-4">' +
+                        '<input name="email" type="email" placeholder="Email" required>' +
+                        '<input name="name" placeholder="Name" required>' +
+                        '<input name="pass" placeholder="Password" required>' +
+                        '<input name="roll" placeholder="Roll Number" required>' +
+                        '<select name="courseId" required>' + '<option value="">Course</option>' + DB.courses.map(function(c) { return '<option value="' + c.id + '">' + c.name + '</option>'; }).join('') + '</select>' +
+                        '<select name="yearId" required>' + '<option value="">Year</option>' + DB.years.map(function(y) { return '<option value="' + y.id + '">' + y.name + '</option>'; }).join('') + '</select>' +
+                        '<input name="phone" placeholder="Phone">' +
+                        '<button type="submit" class="btn btn-success" style="grid-column:span 3;">➕ Add Student</button></form>' +
+                        '<div>' + DB.students.map(function(s) {
+                            var course = DB.courses.find(function(c) { return c.id === s.courseId; });
+                            var year = DB.years.find(function(y) { return y.id === s.yearId; });
+                            return '<div class="item-card flex-between"><div><h3>' + s.name + '</h3><p class="text-sm text-gray">' + s.rollNumber + ' | ' + (course ? course.name : 'N/A') + ' - ' + (year ? year.name : '') + '</p></div>' +
+                                   '<button onclick="deleteItem(\'students\',\'' + s.id + '\')" class="btn btn-danger btn-sm">🗑️</button></div>';
+                        }).join('') + '</div></div>';
+                }
+                
+                document.getElementById('app').innerHTML = 
+                    '<div style="padding:20px;max-width:1400px;margin:0 auto;">' +
+                    '<div class="glass-card"><div class="flex-between">' +
+                    '<div><h1 style="font-size:42px;">Admin Dashboard</h1><span class="badge badge-admin">👨‍💼 Administrator</span></div>' +
+                    '<button onclick="logout()" class="btn btn-danger">🚪 Logout</button></div></div>' +
+                    '<div class="glass-card mt-4">' + menu + '</div>' +
+                    content + '</div>' +
+                    (modal ? '<div class="modal" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">' + modal + '</div></div>' : '');
+                return;
+            }
+            
+            var course = DB.courses.find(function(c) { return c.id === user.courseId; });
+            document.getElementById('app').innerHTML = 
+                '<div style="padding:20px;max-width:1400px;margin:0 auto;">' +
+                '<div class="glass-card"><div class="flex-between">' +
+                '<div><h1 style="font-size:42px;">' + user.name + '</h1>' +
+                '<span class="badge badge-student">👨‍🎓 Student</span>' +
+                '<p class="text-gray mt-4">🎫 ' + user.rollNumber + ' | 📚 ' + (course ? course.name : 'No course') + '</p></div>' +
+                '<button onclick="logout()" class="btn btn-danger">🚪 Logout</button></div></div>' +
+                '<div class="glass-card mt-4"><h2>📊 My Attendance</h2>' +
+                '<div style="text-align:center;padding:60px 20px;"><div style="font-size:64px;margin-bottom:16px;">📈</div>' +
+                '<p class="text-gray" style="font-size:18px;">Attendance records will appear here</p></div></div></div>';
+        }
+        
+        DB.init();
+        render();
+    </script>
+</body>
+</html>
